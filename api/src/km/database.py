@@ -28,9 +28,7 @@ def init_db():
     from km.model import User
 
     db.create_all()
-
-    # with current_app.open_resource("schema.sql") as f:
-    #     db.executescript(f.read().decode("utf8"))
+    db.session.commit()
 
 
 def close_db(e=None):
