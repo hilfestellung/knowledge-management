@@ -28,7 +28,6 @@ def test_register(client, app):
         assert user.first_name == 'Test'
         assert user.last_name == 'User'
         assert user.name == 'Test User'
-        assert repr(user) == "User(email='user@test.org', password='9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', first_name='Test', last_name='User')"
 
 
 def test_login(client, app):
@@ -53,3 +52,4 @@ def test_login(client, app):
     assert decoded_token.get('exp') == int(expires_at / 1000)
     assert decoded_token.get('aud') == 'test.org'
     assert decoded_token.get('iat') == int(datetime_to_unixtimestamp(authentication.now_()) / 1000)
+    assert decoded_token.get('permissions') == ['concept:read']

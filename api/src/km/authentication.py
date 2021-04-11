@@ -34,6 +34,8 @@ create_login_request_args.add_argument('password', type=str, nullable=True)
 
 user_fields = {
     'email': fields.String,
+    'first_name': fields.String,
+    'last_name': fields.String,
 }
 
 
@@ -41,12 +43,14 @@ user_fields = {
 def register():
     from km.database import get_db
     from km.model import User
+    from km.model.user import fetch_user_group, ensure_group_user
 
     args = create_register_request_args.parse_args()
     hash_ = sha256()
     hash_.update(args['password'].encode('utf-8'))
     user = User(email=args['email'], password=hash_.hexdigest(), first_name=args['firstName'],
                 last_name=args['lastName'])
+    user.groups.append(fetch_user_group('User'))
     db = get_db()
     db.session.add(user)
     db.session.commit()
@@ -64,11 +68,11 @@ def login():
     hash_ = sha256()
     hash_.update(args['password'].encode('utf-8'))
     user = User.query.filter_by(email=args['email'], password=hash_.hexdigest()).first()
-    permissions = []
     now = now_()
     expires = now + expiration_timespan
     token = jwt.encode(
-        {'sub': user.email, 'exp': expires, 'aud': current_app.config['JWT_AUDIENCE'], 'iat': now},
+        {'sub': user.email, 'exp': expires, 'aud': current_app.config['JWT_AUDIENCE'], 'iat': now,
+         'permissions': user.permissions},
         current_app.config['PRIVATE_KEY'],
         algorithm='RS256')
     return jsonify({"access_token": token, "expires_at": datetime_to_unixtimestamp(expires)}), 200

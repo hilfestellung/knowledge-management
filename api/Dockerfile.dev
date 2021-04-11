@@ -1,0 +1,18 @@
+FROM python:3-slim
+
+WORKDIR /opt/app
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install dependencies:
+COPY requirements.txt .
+RUN apt-get update && apt-get install build-essential -y && apt-get install libpq-dev -y && \
+    pip install -r requirements.txt
+
+# Run the application:
+COPY ./src/ .
+
+EXPOSE 8080
+CMD ["python", "main.py"]
