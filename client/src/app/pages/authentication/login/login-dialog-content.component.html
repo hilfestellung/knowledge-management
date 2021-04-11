@@ -1,0 +1,25 @@
+<form (ngSubmit)="onSubmit($event)">
+  <mat-form-field class="full-width">
+    <mat-label>Username</mat-label>
+    <input matInput placeholder="Username" [value]="username" (change)="onUsernameChange($event)"
+           [disabled]="!!(authentication.isPending | async)"/>
+  </mat-form-field>
+  <mat-form-field class="full-width">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" placeholder="Password" [value]="password" (change)="onPasswordChange($event)"
+           [disabled]="!!(authentication.isPending | async)"/>
+  </mat-form-field>
+  <div fxLayout="row">
+    <mat-slide-toggle [checked]="rememberMe" (change)="rememberMe = !rememberMe">
+      Remember me
+    </mat-slide-toggle>
+  </div>
+  <mat-dialog-actions align="end">
+    <div fxFlexAlign="center" style="margin-right: 8px" *ngIf="authentication.isPending | async">
+      <mat-progress-spinner color="warn" mode="indeterminate" diameter="16"></mat-progress-spinner>
+    </div>
+    <button mat-raised-button color="primary" type="submit" style="width: 90px"
+            [disabled]="authentication.isPending | async">Login
+    </button>
+  </mat-dialog-actions>
+</form>

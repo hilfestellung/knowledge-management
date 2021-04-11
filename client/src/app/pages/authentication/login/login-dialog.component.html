@@ -1,0 +1,7 @@
+<ng-container>
+  <button mat-button (click)="authenticationService.logout()" *ngIf="(authenticationService.isAuthenticated | async)">
+    Logout
+  </button>
+  <button mat-button (click)="openDialog()" *ngIf="(authenticationService.isAuthenticated | async) === false">Login
+  </button>
+</ng-container>

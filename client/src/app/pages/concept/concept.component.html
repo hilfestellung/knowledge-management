@@ -1,0 +1,19 @@
+<div fxLayout="row">
+  <div fxFlex="1 1 49%">
+    <mat-nav-list role="list">
+      <mat-list-item *ngFor="let concept of concepts" role="list-item" (click)="onSelect(concept)">
+        <mat-icon matListIcon>memory</mat-icon>
+        <h3 matLine>{{ concept | label }}</h3>
+        <p matLine>ID: {{concept.id}}</p>
+        <button mat-icon-button (click)="onDelete(concept, $event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-nav-list>
+  </div>
+  <div fxFlex="1 1 49%" style="margin: 2rem; margin-top: 8px">
+    <div *ngIf="selectedConcept">
+      <app-concept-item [concept]="selectedConcept"></app-concept-item>
+    </div>
+  </div>
+</div>
