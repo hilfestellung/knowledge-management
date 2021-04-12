@@ -28,6 +28,9 @@ def app():
         'PRIVATE_KEY': _private_key
     })
 
+    with app.app_context():
+        init_db()
+
     yield app
 
     rmtree(temp_dir)

@@ -20,13 +20,8 @@ def create_app(test_config=None):
     def root():
         return jsonify({'version': '0.1'})
 
-    with app.app_context():
-        from km.database import init_app
-        init_app(app)
-
-        if 'SQLALCHEMY_DATABASE_URI' in app.config:
-            from km.database import init_db
-            init_db()
+    from km.database import init_app
+    init_app(app)
 
     from km import authentication
     app.register_blueprint(authentication.bp)
