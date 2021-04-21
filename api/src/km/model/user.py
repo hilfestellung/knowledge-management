@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy import ForeignKey
 
-from km.database import Model, Column, String, Integer, Table, get_db, Relationship, Backref
+from km.database import Model, Column, String, Integer, Table, get_db, Relationship, Backref, Boolean, DateTime
 
 user_usergroup_table = Table('user_usergroup', Model.metadata,
                              Column('user_id', Integer, ForeignKey('user.id')),
@@ -66,7 +68,31 @@ class User(Model):
             if len(groups) > 0:
                 groups += ', '
             groups += group
-        return f"User(email='{self.email}', password='{self.password}', first_name='{self.first_name}', last_name='{self.last_name}', groups=[{groups}])"
+        return f"User(id={self.id} email='{self.email}', password='{self.password}', first_name='{self.first_name}', " \
+               f"last_name='{self.last_name}', groups=[{groups}])"
+
+
+class Authentication(Model):
+    __tablename__ = 'authentication'
+    id = Column(Integer, primary_key=True)
+    email = Column(String(200), index=True, nullable=False)
+    ip_address = Column(String(16), index=True, nullable=True)
+    refresh_token = Column(String(36), index=True, nullable=True)
+    success = Column(Boolean, index=True, default=False)
+    message = Column(String(200), nullable=True)
+    expires = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+
+    def __repr__(self):
+        refresh_token = None
+        if self.refresh_token:
+            refresh_token = "'" + self.refresh_token + "'"
+        message = None
+        if self.message:
+            message = "'" + self.message + "'"
+        return f"Authentication(email='{self.email}', ip_address='{self.ip_address}', " \
+               f"expires=datetime.datetime.fromisoformat('{self.expires}'), " \
+               f"refresh_token={refresh_token}, success={self.success}, message={message})"
 
 
 def fetch_permission(name: str):
@@ -107,4 +133,3 @@ def ensure_group_user():
 def setup():
     ensure_group_administrator()
     ensure_group_user()
-    pass

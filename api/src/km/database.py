@@ -11,6 +11,8 @@ Backref = None
 Column = None
 String = None
 Integer = None
+Boolean = None
+DateTime = None
 
 
 def get_db(app=None):
@@ -23,7 +25,7 @@ def get_db(app=None):
 
 
 def init_db():
-    global Model, Table, Relationship, Backref, Column, String, Integer
+    global Model, Table, Relationship, Backref, Column, String, Integer, Boolean, DateTime
     db = get_db()
 
     Model = db.Model
@@ -33,6 +35,8 @@ def init_db():
     Column = db.Column
     String = db.String
     Integer = db.Integer
+    Boolean = db.Boolean
+    DateTime = db.DateTime
 
     # Preload models and register tables here
     from km.model.user import setup as user_setup

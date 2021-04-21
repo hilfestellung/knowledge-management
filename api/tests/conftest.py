@@ -16,7 +16,6 @@ with open(os.path.join(os.path.dirname(__file__), 'config', 'public.key')) as f:
 
 @pytest.fixture(scope='session')
 def app():
-    # connection_url = "postgresql+psycopg2://postgres:vL1NVXu6T@postgres:5432/km"
     temp_dir = tempfile.mkdtemp(prefix='km_test.')
     db_path = os.path.join(temp_dir, 'test.db')
     app = create_app({
@@ -33,7 +32,7 @@ def app():
 
     yield app
 
-    rmtree(temp_dir)
+    #rmtree(temp_dir)
 
 
 @pytest.fixture(scope='session')

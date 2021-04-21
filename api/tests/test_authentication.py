@@ -1,5 +1,7 @@
 import datetime
 import json
+from time import sleep
+from uuid import uuid4
 
 import jwt as jwt
 
@@ -34,6 +36,7 @@ def test_login(client, app):
     from km import authentication
     authentication._is_testing = True
     authentication._test_now = datetime.datetime.utcnow()
+    authentication._test_refresh_token = str(uuid4())
     data_users.setup(client)
 
     response = client.put('/authentication/login', data={})
@@ -44,6 +47,7 @@ def test_login(client, app):
     expires_at = datetime_to_unixtimestamp(authentication.now_() + authentication.expiration_timespan)
     response_data = json.loads(response.data.decode('utf-8'))
     assert response_data.get('access_token') is not None
+    assert response_data.get('refresh_token') == authentication._test_refresh_token
     assert response_data.get('expires_at') == expires_at
 
     decoded_token = jwt.decode(response_data.get('access_token'), app.config['PUBLIC_KEY'], verify=True,
@@ -53,3 +57,45 @@ def test_login(client, app):
     assert decoded_token.get('aud') == 'test.org'
     assert decoded_token.get('iat') == int(datetime_to_unixtimestamp(authentication.now_()) / 1000)
     assert decoded_token.get('permissions') == ['concept:read']
+
+
+def test_refresh(client, app):
+    from km import authentication
+    authentication._is_testing = True
+    authentication._test_now = datetime.datetime.utcnow()
+    authentication._test_refresh_token = str(uuid4())
+
+    response = client.put('/authentication/login', data={'email': 'login@test.org', 'password': 'some'})
+    assert response.status_code == 200
+
+    response_data = json.loads(response.data.decode('utf-8'))
+
+    sleep(0.3)
+    authentication._test_now = datetime.datetime.utcnow()
+    authentication._test_refresh_token = str(uuid4())
+    response = client.put('/authentication/refresh',
+                          data={'token': response_data.get('refresh_token')},
+                          headers={'Authorization': 'Bearer ' + response_data.get('access_token')})
+    assert response.status_code == 200
+
+    expires_at = datetime_to_unixtimestamp(authentication.now_() + authentication.expiration_timespan)
+    response_data = json.loads(response.data.decode('utf-8'))
+    assert response_data.get('access_token') is not None
+    assert response_data.get('refresh_token') == authentication._test_refresh_token
+    assert response_data.get('expires_at') == expires_at
+
+    authentication._test_now = datetime.datetime.fromisoformat('2021-04-14T18:00:00.000')
+    authentication._test_refresh_token = str(uuid4())
+
+    sleep(0.3)
+    response = client.put('/authentication/login', data={'email': 'login@test.org', 'password': 'some'})
+    assert response.status_code == 200
+
+    authentication._test_now = datetime.datetime.fromisoformat('2021-04-16T18:00:01.000')
+    authentication._test_refresh_token = str(uuid4())
+
+    sleep(0.3)
+    response = client.put('/authentication/refresh',
+                          data={'token': response_data.get('refresh_token')},
+                          headers={'Authorization': 'Bearer ' + response_data.get('access_token')})
+    assert response.status_code == 401
